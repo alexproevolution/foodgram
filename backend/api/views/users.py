@@ -1,3 +1,5 @@
+from api.serializers import (AvatarSerializer, SubscriptionSerializer,
+                             UserProfileSerializer)
 from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -6,9 +8,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
-from api.serializers.users import (AvatarSerializer, SubscriptionSerializer,
-                                   UserProfileSerializer)
 from users.models import Subscription
 from users.pagination import UserPagination
 
