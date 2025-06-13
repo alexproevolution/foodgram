@@ -1,0 +1,131 @@
+name: Main Foodgram Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: foodgram
+          POSTGRES_USER: foodgram_user
+          POSTGRES_PASSWORD: foodgram_password
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8==6.0.0 flake8-isort==6.0.0 isort==5.12.0
+          pip install -r ./backend/requirements.txt
+      - name: Check imports with isort
+        run: isort --check-only --diff backend/
+      - name: Test with flake8 and Django tests
+        env:
+          POSTGRES_USER: foodgram_user
+          POSTGRES_PASSWORD: foodgram_password
+          POSTGRES_DB: foodgram
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+        run: |
+          python -m flake8 backend/
+          cd backend/
+          python manage.py test
+
+  build_and_push_backend:
+    name: Push backend Docker image to DockerHub
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push backend to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend/
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+
+  build_and_push_frontend:
+    name: Push frontend Docker image to DockerHub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push frontend to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend/
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_push_backend
+      - build_and_push_frontend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build frontend locally
+        run: |
+          docker run --rm -v $(pwd)/frontend/build:/app/build ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest cp -r /usr/share/nginx/html/. /app/build
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: "infra/docker-compose.production.yml,infra/nginx.conf,frontend/build"
+          target: "foodgram"
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd foodgram
+            # Обновление образов, остановка и запуск контейнеров
+            sudo docker compose -f infra/docker-compose.production.yml pull
+            sudo docker compose -f infra/docker-compose.production.yml down
+            sudo docker compose -f infra/docker-compose.production.yml up -d
+            # Миграции и сборка статики
+            sudo docker compose -f infra/docker-compose.production.yml exec -T backend python manage.py migrate
+            sudo docker compose -f infra/docker-compose.production.yml exec -T backend python manage.py collectstatic --noinput
+
+  send_message:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Send message to Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Роботы закончили работы, деплой Foodgram выполнен!
