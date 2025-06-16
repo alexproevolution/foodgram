@@ -99,6 +99,31 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: ".env"
           target: "foodgram/.env"
+      - name: Create .env file if missing
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd foodgram
+            # Создание .env файла, если ещё нет
+            if [ ! -f .env ]; then
+              echo "POSTGRES_DB=foodgram" > .env
+              echo "POSTGRES_USER=foodgram_user" >> .env
+              echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+              echo "DB_HOST=db" >> .env
+              echo "DB_PORT=5432" >> .env
+              echo "DB_TYPE=postgres" >> .env
+              echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+              echo "ALLOWED_HOSTS=foodgramalex.ddns.net,89.169.173.48,localhost" >> .env
+            fi
+            # Проверка наличия .env
+            if [ ! -f .env ]; then
+              echo "Error: .env file not found!"
+              exit 1
+            fi
       - name: Copy files via SSH
         uses: appleboy/scp-action@master
         with:
