@@ -91,18 +91,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Ensure .env file exists
-        run: |
-          touch .env
-          echo "POSTGRES_DB=foodgram" >> .env
-          echo "POSTGRES_USER=foodgram_user" >> .env
-          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-          echo "DB_HOST=db" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_TYPE=postgres" >> .env
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-          echo "DEBUG=False" >> .env
-          echo "ALLOWED_HOSTS=netkann.ru,localhost,127.0.0.1,158.160.71.90,foodgram_backend" >> .env
       - name: Copy files via SSH
         uses: appleboy/scp-action@master
         with:
@@ -110,7 +98,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "infra/docker-compose.production.yml,infra/nginx.conf,frontend/build,.env"
+          source: "infra/docker-compose.production.yml,infra/nginx.conf,frontend/build"
           target: "foodgram"
       - name: Execute remote deployment
         uses: appleboy/ssh-action@master
