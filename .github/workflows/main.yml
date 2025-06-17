@@ -2,8 +2,6 @@ name: Main Foodgram Workflow
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
 
@@ -28,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8==6.0.0 flake8-isort==6.0.0 isort==5.12.0
+          pip install flake8==6.0.0 flake8-isort==6.0.0 isort==6.0.0
           pip install -r ./backend/requirements.txt
       - name: Check imports with isort
         run: isort --check-only --diff backend/
@@ -89,6 +87,7 @@ jobs:
       - build_and_push_backend
       - build_and_push_frontend
     steps:
+      - name: Checkout repo
       - uses: actions/checkout@v3
       - name: Copy files via SSH
         uses: appleboy/scp-action@master
@@ -97,10 +96,10 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "docker-compose.production.yml"
+          source: "infra/docker-compose.production.yml"
           target: "foodgram"
       - name: Execute remote deployment
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
