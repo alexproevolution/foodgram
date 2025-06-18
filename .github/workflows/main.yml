@@ -103,6 +103,7 @@ jobs:
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
           echo "DEBUG=False" >> .env
           echo "ALLOWED_HOSTS=foodgramalex.ddns.net,89.169.173.48,localhost" >> .env
+          cat .env  # Вывод содержимого файла .env
       - name: Copy files via SSH
         uses: appleboy/scp-action@master
         with:
@@ -112,6 +113,15 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "infra/docker-compose.production.yml,infra/nginx.conf,frontend/build,.env"
           target: "foodgram"
+      - name: Check if .env file exists on remote server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            ls -la foodgram/.env  # Проверка наличия файла .env
       - name: Execute remote deployment
         uses: appleboy/ssh-action@master
         with:
