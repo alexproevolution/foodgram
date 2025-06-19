@@ -7,28 +7,25 @@ services:
   db:
     image: postgres:13
     container_name: foodgram_db
-    env_file: .env
+    env_file:
+      - ../.env
     volumes:
       - pg_data:/var/lib/postgresql/data
-
+    restart: always
 
   backend:
     image: alexproevolution/foodgram_backend:latest
     container_name: foodgram_backend
-    env_file: .env
+    env_file:
+      - ../.env
     depends_on:
       - db
     volumes:
       - static:/app/static
       - media:/app/media
-  
-
-  frontend:
-    image: neljuli07/foodgram_frontend
-    env_file: .env
-    command: cp -r /app/build/. /frontend_static/
-    volumes:
-      - static_production:/frontend_static
+    expose:
+      - "7000"
+    restart: always
 
   nginx:
     container_name: foodgram-proxy
