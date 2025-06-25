@@ -1,30 +1,29 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from foodgram.constants import (EMAIL_MAX_LENGTH, NAME_MAX_LENGTH,
-                                USERNAME_MAX_LENGTH, USERNAME_REGEX)
+from .validators import USERNAME_PATTERN_VALIDATOR
 
 
 class User(AbstractUser):
     """Модель пользователя."""
 
     email = models.EmailField(
-        max_length=EMAIL_MAX_LENGTH,
+        max_length=250,
         unique=True,
         verbose_name='Адрес электронной почты',
     )
     username = models.CharField(
-        max_length=USERNAME_MAX_LENGTH,
+        max_length=150,
         unique=True,
-        validators=[USERNAME_REGEX],
+        validators=[USERNAME_PATTERN_VALIDATOR],
         verbose_name='Имя пользователя',
     )
     first_name = models.CharField(
-        max_length=NAME_MAX_LENGTH,
+        max_length=150,
         verbose_name='Имя',
     )
     last_name = models.CharField(
-        max_length=NAME_MAX_LENGTH,
+        max_length=150,
         verbose_name='Фамилия',
     )
     avatar = models.ImageField(

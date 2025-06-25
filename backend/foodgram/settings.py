@@ -3,8 +3,6 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 
-from foodgram.constants import BASIC_PAGE_SIZE, MAX_LIMIT_PAGE_SIZE
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -12,7 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 INSTALLED_APPS = [
@@ -129,10 +127,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'PAGE_SIZE': BASIC_PAGE_SIZE,
+    'PAGE_SIZE': 6,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE_QUERY_PARAM': 'limit',
-    'MAX_PAGE_SIZE': MAX_LIMIT_PAGE_SIZE,
+    'MAX_PAGE_SIZE': 100,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
@@ -140,8 +138,8 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'api.serializers.users.UserProfileSerializer',
-        'current_user': 'api.serializers.users.UserProfileSerializer',
+        'user': 'users.serializers.UserProfileSerializer',
+        'current_user': 'users.serializers.UserProfileSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],

@@ -1,7 +1,8 @@
-from api.serializers.recipe_mini import RecipeMiniSerializer
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -31,6 +32,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj):
         return obj.avatar.url if obj.avatar else None
+
+
+class UserMiniSerializer(serializers.ModelSerializer):
+    """Базовый сериализатор рецепта."""
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -72,4 +82,4 @@ class SubscriptionSerializer(UserProfileSerializer):
         queryset = obj.recipes.all()
         if limit and limit.isdigit():
             queryset = queryset[:int(limit)]
-        return RecipeMiniSerializer(queryset, many=True).data
+        return UserMiniSerializer(queryset, many=True).data

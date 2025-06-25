@@ -3,6 +3,7 @@ import os
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient
 
 
@@ -15,7 +16,6 @@ class Command(BaseCommand):
             type=str,
             default=os.path.join(
                 settings.BASE_DIR,
-                # '..', для локального тестирования
                 'data',
                 'ingredients.csv'
             ),

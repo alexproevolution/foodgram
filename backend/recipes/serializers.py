@@ -1,8 +1,10 @@
-from api.serializers.users import UserProfileSerializer
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
+
+from users.serializers import UserProfileSerializer
+
+from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -38,6 +40,16 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
+class RecipeMiniSerializer(serializers.ModelSerializer):
+    """Базовый сериализатор рецепта."""
+
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор рецепта на чтение."""
 
@@ -45,10 +57,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     author = UserProfileSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(many=True, read_only=True)
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    is_in_shopping_cart = serializers.BooleanField(
-        read_only=True,
-        default=False,
-    )
+    is_in_shopping_cart = serializers.BooleanField(read_only=True,
+                                                   default=False)
     image = serializers.SerializerMethodField()
 
     class Meta:
