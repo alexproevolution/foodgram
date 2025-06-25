@@ -25,13 +25,13 @@ services:
     expose:
       - "7000"
     command: ["gunicorn", "--bind", "0.0.0.0:7000", "foodgram.wsgi"]
-  
-    frontend:
-      image: alexproevolution/foodgram_frontend:latest
-      env_file: .env
-      command: cp -r /app/build/. /frontend_static/
-      volumes:
-        - static:/frontend_static
+
+  frontend:  # Перенесите frontend на один уровень с backend
+    image: alexproevolution/foodgram_frontend:latest
+    env_file: .env
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/frontend_static
 
   gateway:
     image: alexproevolution/foodgram_gateway:latest
