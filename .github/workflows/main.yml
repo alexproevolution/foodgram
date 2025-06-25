@@ -31,8 +31,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8==6.0.0 flake8-isort==6.0.0
           pip install -r ./backend/requirements.txt
-      - name: Check imports with isort
-        run: isort --check-only --diff backend/ || true
+      # Удалите или закомментируйте следующий шаг, если не хотите проверять isort
+      # - name: Check imports with isort
+      #   run: isort --check-only --diff backend/ || true
       - name: Test with flake8 and Django tests
         env:
           POSTGRES_USER: foodgram_user
@@ -150,6 +151,4 @@ jobs:
           message: |
             🚀 Деплой успешно завершён!
             Автор: ${{ github.actor }}
-            Сообщение коммита: ${{ github.event.head_commit.message }}
-            Репозиторий: ${{ github.repository }}
-            Посмотреть изменения: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}
+            Сообщение коммита: $ ⬤
