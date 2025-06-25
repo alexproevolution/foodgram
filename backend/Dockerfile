@@ -12,4 +12,4 @@ COPY data/ingredients.csv /app/data/ingredients.csv
 
 RUN mkdir -p /app/static /app/media
 
-CMD ["gunicorn", "--bind", "0.0.0.0:7000", "foodgram.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:7000", "foodgram.wsgi"] 
