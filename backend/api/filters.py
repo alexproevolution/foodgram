@@ -1,6 +1,4 @@
-from django_filters.rest_framework import (AllValuesMultipleFilter,
-                                           BooleanFilter, CharFilter,
-                                           FilterSet)
+from django_filters.rest_framework import FilterSet, filters
 
 from recipes.models import Ingredient, Recipe
 
@@ -8,7 +6,7 @@ from recipes.models import Ingredient, Recipe
 class IngredientFilter(FilterSet):
     """Фильтр для поиска ингредиентов."""
 
-    name = CharFilter(
+    name = filters.CharFilter(
         field_name='name',
         lookup_expr='istartswith',
         help_text='Название ингредиента (по начальным буквам)',
@@ -22,15 +20,15 @@ class IngredientFilter(FilterSet):
 class RecipeFilter(FilterSet):
     """Фильтр для рецептов."""
 
-    tags = AllValuesMultipleFilter(
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
         help_text='Фильтрация по слагам тегов',
     )
-    is_favorited = BooleanFilter(
+    is_favorited = filters.BooleanFilter(
         field_name='is_favorited',
         help_text='Фильтр по избранному',
     )
-    is_in_shopping_cart = BooleanFilter(
+    is_in_shopping_cart = filters.BooleanFilter(
         field_name='is_in_shopping_cart',
         help_text='Фильтр по корзине',
     )
