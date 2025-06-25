@@ -1,6 +1,5 @@
-from django.urls import path
-
 from api.views import redirect_short_link
+from django.urls import path
 
 urlpatterns = [
     path(
