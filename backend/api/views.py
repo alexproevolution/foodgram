@@ -24,12 +24,6 @@ from users.models import Subscription
 User = get_user_model()
 
 
-def redirect_short_link(request, short_code):
-    """Перенаправление по короткой ссылке на рецепт."""
-    recipe = Recipe.objects.filter(short_code=short_code).first()
-    return redirect(f'/recipes/{recipe.pk}/') if recipe else redirect('/404/')
-
-
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет тегов."""
 
@@ -63,8 +57,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет рецептов."""
 
     queryset = Recipe.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = RecipePagination
 
@@ -277,3 +271,9 @@ class UserViewSet(DjoserUserViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def redirect_short_link(request, short_code):
+    """Перенаправление по короткой ссылке на рецепт."""
+    recipe = Recipe.objects.filter(short_code=short_code).first()
+    return redirect(f'/recipes/{recipe.pk}/') if recipe else redirect('/404/')

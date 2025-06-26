@@ -7,6 +7,33 @@ from django.db.models import Exists, OuterRef
 User = get_user_model()
 
 
+class Ingredient(models.Model):
+    """Модель ингредиента."""
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название ингредиента',
+    )
+    measurement_unit = models.CharField(
+        max_length=50,
+        verbose_name='Единицы измерения',
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient'
+            )
+        ]
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ('name',)
+
+    def __str__(self):
+        return f'{self.name} ({self.measurement_unit})'
+
+
 class RecipeManager(models.Manager):
     """Менеджер для модели рецептов."""
 
@@ -124,33 +151,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Ingredient(models.Model):
-    """Модель ингредиента."""
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name='Название ингредиента',
-    )
-    measurement_unit = models.CharField(
-        max_length=50,
-        verbose_name='Единицы измерения',
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=('name', 'measurement_unit'),
-                name='unique_ingredient'
-            )
-        ]
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-        ordering = ('name',)
-
-    def __str__(self):
-        return f'{self.name} ({self.measurement_unit})'
 
 
 class RecipeIngredient(models.Model):
